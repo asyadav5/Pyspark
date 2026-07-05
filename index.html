@@ -426,61 +426,115 @@ Partition 3 → Executor 0 (when done with P1)
 
                 <h3>The Complete Workflow: From Code to Results</h3>
 
-                <div class="diagram">
-┌─────────────────────────────────────────────────────────┐
-│ 1. YOU SUBMIT PYSPARK JOB                               │
-│    spark-submit script.py                               │
-└──────────────────┬──────────────────────────────────────┘
-                   ↓
-┌─────────────────────────────────────────────────────────┐
-│ 2. DRIVER NODE STARTS                                   │
-│    ✓ Initializes SparkSession                           │
-│    ✓ Parses your Python code                            │
-│    ✓ Creates RDD/DataFrame objects (no execution yet!)  │
-└──────────────────┬──────────────────────────────────────┘
-                   ↓
-┌─────────────────────────────────────────────────────────┐
-│ 3. ACTION TRIGGERED (e.g., .show(), .write())           │
-│    NOW Spark builds Logical → Physical Plan             │
-└──────────────────┬──────────────────────────────────────┘
-                   ↓
-┌─────────────────────────────────────────────────────────┐
-│ 4. DAG OPTIMIZATION                                     │
-│    ✓ Combines operations (predicate pushdown)           │
-│    ✓ Plans shuffle if needed (groupBy, join)            │
-│    ✓ Creates Stages from DAG                            │
-└──────────────────┬──────────────────────────────────────┘
-                   ↓
-┌─────────────────────────────────────────────────────────┐
-│ 5. CLUSTER MANAGER ASSIGNS RESOURCES                    │
-│    ✓ "Executor 1: Run Task 1-4 on Partitions 1-4"      │
-│    ✓ "Executor 2: Run Task 5-8 on Partitions 5-8"      │
-│    ✓ "Executor 3: Run Task 9 on Partition 9"           │
-└──────────────────┬──────────────────────────────────────┘
-                   ↓
-┌─────────────────────────────────────────────────────────┐
-│ 6. EXECUTORS PROCESS IN PARALLEL                        │
-│    Each executor:                                       │
-│    ✓ Reads partition data                              │
-│    ✓ Applies transformations (filter, map, etc.)       │
-│    ✓ Caches intermediate results if needed             │
-│    ✓ Returns results to driver (shuffle if needed)     │
-└──────────────────┬──────────────────────────────────────┘
-                   ↓
-┌─────────────────────────────────────────────────────────┐
-│ 7. SHUFFLE (if needed - groupBy, join, etc.)           │
-│    Data moves between executors across network         │
-│    (The most expensive operation!)                      │
-└──────────────────┬──────────────────────────────────────┘
-                   ↓
-┌─────────────────────────────────────────────────────────┐
-│ 8. FINAL AGGREGATION & RESULT COLLECTION                │
-│    ✓ Driver collects results from executors             │
-│    ✓ Combines partitions                                │
-│    ✓ Returns to user                                    │
-└──────────────────┬──────────────────────────────────────┘
-                   ↓
-                 DONE! ✅
+                <div style="background: #f8f9fa; border: 2px solid #667eea; border-radius: 12px; padding: 30px; margin: 30px 0;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start;">
+                        <!-- LEFT COLUMN: CODE -->
+                        <div style="border-right: 2px dashed #ccc; padding-right: 20px;">
+                            <h4 style="color: #667eea; margin-bottom: 20px;">YOUR CODE</h4>
+                            
+                            <div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px; font-family: monospace; font-size: 0.9em;">
+                                <div style="color: #28a745; margin-bottom: 5px;">✓ Step 1: You Submit PySpark Job</div>
+                                <code>spark-submit script.py</code>
+                            </div>
+
+                            <div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                                <div style="color: #28a745; margin-bottom: 5px;">✓ Step 2: Driver Node Starts</div>
+                                <div style="font-size: 0.85em;">Initializes SparkSession | Parses your Python code | Creates RDD/DataFrame objects (no execution yet!)</div>
+                            </div>
+
+                            <div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                                <div style="color: #28a745; margin-bottom: 5px;">✓ Step 3: Action Triggered</div>
+                                <div style="font-size: 0.85em;">NOW Spark builds Logical → Physical Plan</div>
+                                <code style="color: #d63384;">.show(), .write()</code>
+                            </div>
+
+                            <div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                                <div style="color: #28a745; margin-bottom: 5px;">✓ Step 4: DAG Optimization</div>
+                                <div style="font-size: 0.85em;">Combines operations (predicate pushdown) | Plans shuffle if needed (groupBy, join) | Creates Stages from DAG</div>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT COLUMN: EXECUTION -->
+                        <div style="padding-left: 20px;">
+                            <h4 style="color: #764ba2; margin-bottom: 20px;">CLUSTER EXECUTION</h4>
+                            
+                            <div style="background: #e7f3ff; border-left: 4px solid #667eea; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                                <div style="color: #667eea; font-weight: bold; margin-bottom: 8px;">Step 5: Cluster Manager Assigns Resources</div>
+                                <div style="font-size: 0.9em;">
+                                    "Executor 1: Run Task 1-4 on Partitions 1-4"<br>
+                                    "Executor 2: Run Task 5-8 on Partitions 5-8"<br>
+                                    "Executor 3: Run Task 9 on Partition 9"
+                                </div>
+                            </div>
+
+                            <div style="background: #d4edda; border-left: 4px solid #28a745; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                                <div style="color: #28a745; font-weight: bold; margin-bottom: 8px;">Step 6: Executors Process In Parallel ⚡</div>
+                                <div style="font-size: 0.9em;">
+                                    Each executor:<br>
+                                    ✓ Reads partition data<br>
+                                    ✓ Applies transformations (filter, map, etc.)<br>
+                                    ✓ Caches intermediate results if needed<br>
+                                    ✓ Returns results to driver
+                                </div>
+                            </div>
+
+                            <div style="background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                                <div style="color: #ffc107; font-weight: bold; margin-bottom: 8px;">Step 7: Shuffle (if needed) 🌐</div>
+                                <div style="font-size: 0.9em;">
+                                    Data moves between executors across network<br>
+                                    <strong>(The most expensive operation!)</strong>
+                                </div>
+                            </div>
+
+                            <div style="background: #d4edda; border-left: 4px solid #28a745; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                                <div style="color: #28a745; font-weight: bold; margin-bottom: 8px;">Step 8: Final Result Collection ✅</div>
+                                <div style="font-size: 0.9em;">
+                                    Driver collects results from executors<br>
+                                    Combines partitions<br>
+                                    Returns to user
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VISUAL TIMELINE -->
+                    <div style="margin-top: 30px; padding-top: 30px; border-top: 2px solid #ddd;">
+                        <h4 style="color: #333; margin-bottom: 20px; text-align: center;">Execution Timeline</h4>
+                        <div style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 15px;">
+                            <div style="text-align: center;">
+                                <div style="background: #667eea; color: white; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 10px;">1</div>
+                                <div style="font-size: 0.85em;">Submit Job</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="background: #667eea; color: white; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 10px;">2</div>
+                                <div style="font-size: 0.85em;">Driver Start</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="background: #667eea; color: white; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 10px;">3</div>
+                                <div style="font-size: 0.85em;">Action</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="background: #764ba2; color: white; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 10px;">4</div>
+                                <div style="font-size: 0.85em;">Optimize</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="background: #764ba2; color: white; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 10px;">5</div>
+                                <div style="font-size: 0.85em;">Allocate</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="background: #28a745; color: white; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 10px;">6</div>
+                                <div style="font-size: 0.85em;">Process</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="background: #ffc107; color: white; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 10px;">7</div>
+                                <div style="font-size: 0.85em;">Shuffle</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="background: #28a745; color: white; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 10px;">✓</div>
+                                <div style="font-size: 0.85em;">Results</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -645,34 +699,142 @@ df_grouped = df_selected.groupBy("state").agg(
 # ACTION - Trigger Execution!
 df_grouped.show()</code></pre>
 
-                <h3>What Happens Behind the Scenes</h3>
+                <h3>What Happens Behind the Scenes: Complete Stage Breakdown</h3>
 
-                <div class="diagram">
-STAGE 1: Read & Filter & Select (Narrow Transformations) ✅
-├─ Partition 1 (128MB) on Executor 0
-│  ↓ Read CSV → Filter → Select
-│  ↓ Output: 150,000 rows
-├─ Partition 2 (128MB) on Executor 1 (Parallel!)
-│  ↓ Read CSV → Filter → Select
-│  ↓ Output: 150,000 rows
-└─ ... (Partitions 3-9 processed similarly)
+                <div style="background: #f8f9fa; border: 2px solid #667eea; border-radius: 12px; padding: 25px; margin: 25px 0;">
+                    
+                    <!-- STAGE 1 -->
+                    <div style="margin-bottom: 30px;">
+                        <div style="background: #667eea; color: white; padding: 15px 20px; border-radius: 8px 8px 0 0; font-weight: bold; font-size: 1.1em;">
+                            STAGE 1: Read & Filter & Select (Narrow Transformations) ✅
+                        </div>
+                        <div style="background: white; border: 1px solid #667eea; border-top: none; padding: 20px; border-radius: 0 0 8px 8px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div>
+                                    <strong style="color: #667eea;">Partition 1 (128MB)</strong><br>
+                                    on Executor 0
+                                    <div style="background: #f0f0f0; padding: 15px; margin-top: 10px; border-radius: 6px; font-family: monospace; font-size: 0.9em;">
+                                        <div>↓ Read CSV file</div>
+                                        <div>↓ Filter (amount > 1000)</div>
+                                        <div>↓ Select 3 columns</div>
+                                        <div style="color: #28a745; font-weight: bold;">✓ Output: 150,000 rows</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <strong style="color: #667eea;">Partition 2 (128MB)</strong><br>
+                                    on Executor 1 <span style="color: #28a745;">(Parallel!)</span>
+                                    <div style="background: #f0f0f0; padding: 15px; margin-top: 10px; border-radius: 6px; font-family: monospace; font-size: 0.9em;">
+                                        <div>↓ Read CSV file</div>
+                                        <div>↓ Filter (amount > 1000)</div>
+                                        <div>↓ Select 3 columns</div>
+                                        <div style="color: #28a745; font-weight: bold;">✓ Output: 150,000 rows</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 15px; padding: 12px; background: #e7f3ff; border-left: 4px solid #667eea; border-radius: 4px;">
+                                <strong style="color: #667eea;">⚡ Key Point:</strong> All partitions process simultaneously (no waiting!) = FAST
+                            </div>
+                            <div style="margin-top: 15px; text-align: center; color: #666;">
+                                ... (Partitions 3-9 process similarly in parallel)
+                            </div>
+                        </div>
+                    </div>
 
-                ↓ (1.5 million rows now)
+                    <!-- STAGE 2 -->
+                    <div style="margin-bottom: 30px;">
+                        <div style="background: #ffc107; color: white; padding: 15px 20px; border-radius: 8px 8px 0 0; font-weight: bold; font-size: 1.1em;">
+                            STAGE 2: Shuffle & GroupBy (Wide Transformation) 🌐 SLOW
+                        </div>
+                        <div style="background: white; border: 1px solid #ffc107; border-top: none; padding: 20px; border-radius: 0 0 8px 8px;">
+                            <div style="background: #fffacd; padding: 15px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
+                                <strong>Data is shuffled across network:</strong><br>
+                                Data moves between executors across the network (SLOW!) 🌐
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+                                <div>
+                                    <strong style="color: #ffc107;">Before Shuffle:</strong>
+                                    <div style="background: #f0f0f0; padding: 15px; margin-top: 10px; border-radius: 6px; font-family: monospace; font-size: 0.9em;">
+                                        <div>Executor 0:</div>
+                                        <div>&nbsp;&nbsp;CA: scattered</div>
+                                        <div>&nbsp;&nbsp;NY: scattered</div>
+                                        <div>&nbsp;&nbsp;TX: scattered</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <strong style="color: #28a745;">After Shuffle:</strong>
+                                    <div style="background: #f0f0f0; padding: 15px; margin-top: 10px; border-radius: 6px; font-family: monospace; font-size: 0.9em;">
+                                        <div>Executor 0:</div>
+                                        <div>&nbsp;&nbsp;CA: together ✓</div>
+                                        <div>Executor 1:</div>
+                                        <div>&nbsp;&nbsp;NY: together ✓</div>
+                                    </div>
+                                </div>
+                            </div>
 
-STAGE 2: Shuffle & GroupBy (Wide Transformation) ⚡
-├─ Data is shuffled across network:
-│  - All CA rows → Executor 0
-│  - All NY rows → Executor 1
-│  - All TX rows → Executor 0
-│  - etc.
-├─ Then aggregate locally in each executor
-└─ Result: 50 rows (one per state)
+                            <div style="background: #d4edda; padding: 15px; border-radius: 6px; border-left: 4px solid #28a745;">
+                                <strong style="color: #28a745;">After local aggregation:</strong><br>
+                                Each executor sums up its state's totals → Result: 50 rows (one per state)
+                            </div>
+                        </div>
+                    </div>
 
-                ↓
+                    <!-- STAGE 3 -->
+                    <div style="margin-bottom: 30px;">
+                        <div style="background: #28a745; color: white; padding: 15px 20px; border-radius: 8px 8px 0 0; font-weight: bold; font-size: 1.1em;">
+                            STAGE 3: Collect & Display Results ✅
+                        </div>
+                        <div style="background: white; border: 1px solid #28a745; border-top: none; padding: 20px; border-radius: 0 0 8px 8px;">
+                            <div style="background: #f0f0f0; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 0.9em; margin-bottom: 15px;">
+                                <div style="color: #28a745; font-weight: bold;">✓ Driver collects 50 rows from executors</div>
+                                <div style="color: #28a745; font-weight: bold;">✓ Displays results to user:</div>
+                                <div style="margin-top: 10px; font-size: 0.85em;">
+                                    state | total_sales<br>
+                                    ──────────────────<br>
+                                    CA    | $5,000,000<br>
+                                    NY    | $3,200,000<br>
+                                    TX    | $2,800,000<br>
+                                    ... (47 more states)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-STAGE 3: Collect & Display
-├─ Driver collects 50 rows
-└─ Displays results to user ✅
+                    <!-- SUMMARY TABLE -->
+                    <div style="background: #e7f3ff; border: 2px solid #667eea; border-radius: 8px; padding: 20px; margin-top: 30px;">
+                        <h4 style="color: #667eea; margin-top: 0;">Quick Summary: Input → Output</h4>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr style="background: #667eea; color: white;">
+                                <th style="padding: 12px; text-align: left;">Stage</th>
+                                <th style="padding: 12px; text-align: left;">What Happens</th>
+                                <th style="padding: 12px; text-align: left;">Input Size</th>
+                                <th style="padding: 12px; text-align: left;">Output Size</th>
+                                <th style="padding: 12px; text-align: left;">Speed</th>
+                            </tr>
+                            <tr style="background: #f9f9f9;">
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd;"><strong>Stage 1</strong></td>
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd;">Read, Filter, Select</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd;">1.2 GB</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd;">150 MB</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd;">⚡ FAST</td>
+                            </tr>
+                            <tr style="background: #fffacd;">
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd;"><strong>Stage 2</strong></td>
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd;">Shuffle & GroupBy</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd;">150 MB</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd;">5 MB</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #ddd;">⏱️ SLOW</td>
+                            </tr>
+                            <tr style="background: #f9f9f9;">
+                                <td style="padding: 12px;"><strong>Stage 3</strong></td>
+                                <td style="padding: 12px;">Collect & Display</td>
+                                <td style="padding: 12px;">50 rows</td>
+                                <td style="padding: 12px;">50 rows</td>
+                                <td style="padding: 12px;">⚡ FAST</td>
+                            </tr>
+                        </table>
+                    </div>
+
                 </div>
             </section>
 
