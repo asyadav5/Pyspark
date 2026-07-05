@@ -1,0 +1,72 @@
+site_name: PySpark Architecture & Execution Guide
+site_description: Complete learning resource for PySpark architecture, execution, and interview preparation
+site_author: Ajeet Singh
+site_url: https://yourdomain.com
+
+theme:
+  name: material
+  palette:
+    primary: deep purple
+    accent: amber
+  logo: assets/logo.png
+  favicon: assets/favicon.ico
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.top
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+plugins:
+  - search
+  - git-revision-date-localized:
+      type: iso_date
+
+markdown_extensions:
+  - pymdownx.highlight:
+      use_pygments: true
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - admonition
+  - pymdownx.details
+  - pymdownx.tabbed
+  - tables
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+  - Architecture: 
+    - Core Components: architecture/components.md
+    - Complete Workflow: architecture/workflow.md
+  - Core Concepts:
+    - RDDs vs DataFrames: concepts/rdd-vs-dataframe.md
+    - Lazy Evaluation & DAGs: concepts/lazy-evaluation.md
+    - Transformations vs Actions: concepts/transformations-actions.md
+    - Shuffling: concepts/shuffling.md
+  - Execution:
+    - Step-by-Step Workflow: execution/workflow.md
+    - Code Example: execution/code-example.md
+    - Spark UI Monitoring: execution/spark-ui.md
+  - Interview Q&A:
+    - Question 1-3: interview/qa-1-3.md
+    - Question 4-7: interview/qa-4-7.md
+  - Optimization:
+    - Caching & Persistence: optimization/caching.md
+    - Partitioning: optimization/partitioning.md
+    - File Formats: optimization/file-formats.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/yourusername
+    - icon: fontawesome/brands/linkedin
+      link: https://linkedin.com/in/yourprofile
+  generator: false
+
+copyright: Copyright &copy; 2026 - Ajeet Singh

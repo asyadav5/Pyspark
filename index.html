@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PySpark Architecture & Execution Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        nav {
+            background: #f8f9fa;
+            border-bottom: 2px solid #667eea;
+            padding: 20px 40px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        nav a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #764ba2;
+        }
+
+        main {
+            padding: 40px;
+        }
+
+        section {
+            margin-bottom: 60px;
+            scroll-margin-top: 80px;
+        }
+
+        h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #764ba2;
+            font-size: 1.5em;
+            margin: 30px 0 15px 0;
+        }
+
+        h4 {
+            color: #555;
+            font-size: 1.1em;
+            margin: 20px 0 10px 0;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 15px;
+            line-height: 1.8;
+        }
+
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        pre code {
+            color: #f8f8f2;
+            background: none;
+            padding: 0;
+        }
+
+        .highlight-box {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .highlight-box strong {
+            color: #667eea;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        tr:hover {
+            background: #f0f0f0;
+        }
+
+        .diagram {
+            background: #f8f9fa;
+            border: 2px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            line-height: 1.4;
+        }
+
+        .qa-section {
+            background: #f8f9fa;
+            border-left: 4px solid #764ba2;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .qa-section strong {
+            color: #764ba2;
+            font-size: 1.1em;
+        }
+
+        .qa-section .answer {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        footer {
+            background: #2d2d2d;
+            color: white;
+            text-align: center;
+            padding: 30px 40px;
+            margin-top: 60px;
+        }
+
+        .emoji {
+            font-size: 1.2em;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #667eea;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.3s;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .back-to-top.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .back-to-top:hover {
+            background: #764ba2;
+            transform: translateY(-5px);
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            main {
+                padding: 20px;
+            }
+
+            h2 {
+                font-size: 1.5em;
+            }
+
+            h3 {
+                font-size: 1.2em;
+            }
+
+            pre {
+                font-size: 0.85em;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 PySpark Architecture & Execution Guide</h1>
+            <p>A Comprehensive Learning Resource for Data Engineers & Interview Preparation</p>
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#concepts">Core Concepts</a></li>
+                <li><a href="#execution">Execution</a></li>
+                <li><a href="#interviews">Interview Q&A</a></li>
+                <li><a href="#optimization">Optimization</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <!-- SECTION 1: ARCHITECTURE -->
+            <section id="architecture">
+                <h2><span class="emoji">🏗️</span> PySpark Architecture Demystified</h2>
+
+                <h3>The Restaurant Kitchen Analogy 🍳</h3>
+                <p>Imagine a high-volume restaurant serving thousands of customers:</p>
+
+                <div class="diagram">
+CUSTOMERS (Your Data)
+    ↓
+HEAD CHEF (Driver) - Plans the menu and cooking strategy
+    ↓
+KITCHEN MANAGER (Cluster Manager) - Allocates stations to chefs
+    ↓
+KITCHEN STATIONS (Worker Nodes/Executors) - Cook different dishes in parallel
+    ↓
+INDIVIDUAL COOKS (Tasks) - Do the actual work
+    ↓
+COMPLETED DISHES (Results)
+                </div>
+
+                <p><strong>PySpark works exactly like this:</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 20px;">
+                    <li><strong>Customers arriving</strong> = Data being ingested</li>
+                    <li><strong>Head Chef</strong> = Your driver node (orchestrator)</li>
+                    <li><strong>Kitchen stations</strong> = Executor nodes (workers)</li>
+                    <li><strong>Individual cooks</strong> = Tasks running in parallel</li>
+                    <li><strong>Dishes being prepared</strong> = Transformations on data partitions</li>
+                </ul>
+
+                <h3>Core Components Explained</h3>
+
+                <h4>1️⃣ Driver Node (The Head Chef)</h4>
+                <p><strong>What it does:</strong> Orchestrates the entire job</p>
+                <p><strong>Responsibilities:</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 20px;">
+                    <li>Runs your Python code</li>
+                    <li>Creates a Logical Plan (what to do)</li>
+                    <li>Creates a Physical Plan (how to do it efficiently)</li>
+                    <li>Sends tasks to executors</li>
+                    <li>Collects results from executors</li>
+                </ul>
+
+                <pre><code># When you write this:
+spark = SparkSession.builder.appName("MyApp").getOrCreate()
+df = spark.read.csv("data.csv")
+df.show()
+
+# The DRIVER:
+# 1. Parses your code
+# 2. Builds a DAG (graph of operations)
+# 3. Optimizes it
+# 4. Sends "show" command to executors</code></pre>
+
+                <div class="highlight-box">
+                    <strong>Key Point:</strong> The driver is a single point of orchestration. If your driver crashes, your entire job fails. That's why cluster mode exists for production.
+                </div>
+
+                <h4>2️⃣ Cluster Manager (Kitchen Manager)</h4>
+                <p><strong>What it does:</strong> Allocates resources (CPU, memory) to executors</p>
+                <p><strong>Types:</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 20px;">
+                    <li><strong>Standalone:</strong> Built-in Spark cluster manager</li>
+                    <li><strong>YARN:</strong> Hadoop's resource manager (common in enterprises)</li>
+                    <li><strong>Kubernetes:</strong> For containerized deployments</li>
+                    <li><strong>Mesos:</strong> Another resource manager</li>
+                </ul>
+
+                <div class="highlight-box">
+                    <strong>Key Point:</strong> The cluster manager doesn't do actual data processing. It just decides who gets what resources.
+                </div>
+
+                <h4>3️⃣ Worker Nodes & Executors (Kitchen Stations)</h4>
+                <p><strong>What it does:</strong> Actually processes data</p>
+
+                <div class="diagram">
+CLUSTER WITH 5 EXECUTORS
+┌─────────────────────────────────────────┐
+│ EXECUTOR 1        │ EXECUTOR 2          │
+│ Cores: 4 (Slots)  │ Cores: 4 (Slots)    │
+│ Memory: 8GB       │ Memory: 8GB         │
+│ ┌──┬──┬──┬──┐    │ ┌──┬──┬──┬──┐      │
+│ │T1│T2│T3│T4│    │ │T5│T6│T7│T8│      │
+│ └──┴──┴──┴──┘    │ └──┴──┴──┴──┘      │
+└─────────────────────────────────────────┘
+
+All tasks run in PARALLEL! (20 tasks simultaneously)
+                </div>
+
+                <h4>4️⃣ Partitions (Data Distribution)</h4>
+                <p>A partition is a chunk of data that one executor processes:</p>
+
+                <div class="diagram">
+Original Data: 1 GB (too big for one executor)
+    ↓
+Split into 9 partitions: 128 MB each
+    ↓
+Partition 1 → Executor 0
+Partition 2 → Executor 1
+Partition 3 → Executor 0 (when done with P1)
+...
+(All processed in parallel!)
+                </div>
+
+                <h4>5️⃣ Tasks (Individual Units of Work)</h4>
+                <p>A task is a unit of work that runs on one partition, assigned to one executor core.</p>
+
+                <div class="success-box">
+                    <strong>Simple Math:</strong> If you have 9 partitions and 4 executor cores:
+                    <br>→ First wave: 4 tasks run in parallel (on 4 cores)
+                    <br>→ Second wave: 4 more tasks (one task waits)
+                    <br>→ Third wave: 1 remaining task
+                    <br><br>Total time = 3 waves × task_duration
+                </div>
+
+                <h3>The Complete Workflow: From Code to Results</h3>
+
+                <div class="diagram">
+┌─────────────────────────────────────────────────────────┐
+│ 1. YOU SUBMIT PYSPARK JOB                               │
+│    spark-submit script.py                               │
+└──────────────────┬──────────────────────────────────────┘
+                   ↓
+┌─────────────────────────────────────────────────────────┐
+│ 2. DRIVER NODE STARTS                                   │
+│    ✓ Initializes SparkSession                           │
+│    ✓ Parses your Python code                            │
+│    ✓ Creates RDD/DataFrame objects (no execution yet!)  │
+└──────────────────┬──────────────────────────────────────┘
+                   ↓
+┌─────────────────────────────────────────────────────────┐
+│ 3. ACTION TRIGGERED (e.g., .show(), .write())           │
+│    NOW Spark builds Logical → Physical Plan             │
+└──────────────────┬──────────────────────────────────────┘
+                   ↓
+┌─────────────────────────────────────────────────────────┐
+│ 4. DAG OPTIMIZATION                                     │
+│    ✓ Combines operations (predicate pushdown)           │
+│    ✓ Plans shuffle if needed (groupBy, join)            │
+│    ✓ Creates Stages from DAG                            │
+└──────────────────┬──────────────────────────────────────┘
+                   ↓
+┌─────────────────────────────────────────────────────────┐
+│ 5. CLUSTER MANAGER ASSIGNS RESOURCES                    │
+│    ✓ "Executor 1: Run Task 1-4 on Partitions 1-4"      │
+│    ✓ "Executor 2: Run Task 5-8 on Partitions 5-8"      │
+│    ✓ "Executor 3: Run Task 9 on Partition 9"           │
+└──────────────────┬──────────────────────────────────────┘
+                   ↓
+┌─────────────────────────────────────────────────────────┐
+│ 6. EXECUTORS PROCESS IN PARALLEL                        │
+│    Each executor:                                       │
+│    ✓ Reads partition data                              │
+│    ✓ Applies transformations (filter, map, etc.)       │
+│    ✓ Caches intermediate results if needed             │
+│    ✓ Returns results to driver (shuffle if needed)     │
+└──────────────────┬──────────────────────────────────────┘
+                   ↓
+┌─────────────────────────────────────────────────────────┐
+│ 7. SHUFFLE (if needed - groupBy, join, etc.)           │
+│    Data moves between executors across network         │
+│    (The most expensive operation!)                      │
+└──────────────────┬──────────────────────────────────────┘
+                   ↓
+┌─────────────────────────────────────────────────────────┐
+│ 8. FINAL AGGREGATION & RESULT COLLECTION                │
+│    ✓ Driver collects results from executors             │
+│    ✓ Combines partitions                                │
+│    ✓ Returns to user                                    │
+└──────────────────┬──────────────────────────────────────┘
+                   ↓
+                 DONE! ✅
+                </div>
+            </section>
+
+            <!-- SECTION 2: CORE CONCEPTS -->
+            <section id="concepts">
+                <h2><span class="emoji">💡</span> Core Concepts & The Missing Pieces</h2>
+
+                <h3>1. RDDs vs DataFrames: Why We Prefer DataFrames</h3>
+
+                <h4>RDD (Resilient Distributed Dataset)</h4>
+                <pre><code># RDD = Low-level, unstructured data
+rdd = sc.parallelize([1, 2, 3, 4, 5])
+rdd_mapped = rdd.map(lambda x: x * 2)
+rdd_result = rdd_mapped.collect()  # [2, 4, 6, 8, 10]</code></pre>
+
+                <h4>DataFrame (Recommended ✅)</h4>
+                <pre><code># DataFrame = Structured, SQL-like data
+df = spark.read.csv("data.csv", header=True)
+df_filtered = df.filter(df.amount > 100)
+df_filtered.show()</code></pre>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Use Case</th>
+                            <th>RDD</th>
+                            <th>DataFrame</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Unstructured data</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td>Structured/tabular data</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td>SQL queries</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td>Custom partitioning logic</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td>Performance-critical job</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="success-box">
+                    <strong>Key Takeaway:</strong> Always use <strong>DataFrame</strong> unless you have a very specific reason not to. DataFrames are 10-100x faster due to the Catalyst Optimizer.
+                </div>
+
+                <h3>2. Lazy Evaluation & DAGs: The Game Changer</h3>
+
+                <div class="highlight-box">
+                    <strong>Without Lazy Evaluation (Bad):</strong> Process 1 GB THREE TIMES just to get 10 rows! 🔥
+                    <br><br>
+                    <strong>With Lazy Evaluation (Good):</strong> Process only what's needed! 🎯
+                </div>
+
+                <h3>3. Transformations vs Actions</h3>
+
+                <h4>Transformations (Lazy - Don't Execute)</h4>
+                <pre><code># NARROW Transformations (No Shuffle)
+df_filtered = df.filter(df.age > 21)              # Filter rows
+df_selected = df.select("name", "age")            # Select columns
+df_renamed = df.withColumn("salary_double", df.salary * 2)  # Add column
+
+# WIDE Transformations (Requires Shuffle)
+df_grouped = df.groupBy("department").sum("salary")  # Group & aggregate
+df_joined = df1.join(df2, "id")                      # Join two DataFrames</code></pre>
+
+                <h4>Actions (Eager - Execute Immediately)</h4>
+                <pre><code>df.show()                    # Display first 20 rows
+df.collect()                 # Return all rows to driver
+df.count()                   # Count total rows
+df.write.parquet("output/")  # Write to file</code></pre>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Transformation</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Returns DataFrame</td>
+                            <td>Returns result to driver</td>
+                        </tr>
+                        <tr>
+                            <td>Lazy (stored as plan)</td>
+                            <td>Eager (executes immediately)</td>
+                        </tr>
+                        <tr>
+                            <td>Can be chained</td>
+                            <td>Triggers full DAG execution</td>
+                        </tr>
+                        <tr>
+                            <td>e.g., .filter(), .select()</td>
+                            <td>e.g., .show(), .write()</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>4. Shuffling & Network Overhead: The Expensive Operation</h3>
+
+                <p><strong>Shuffling = Data moving between executors across the network.</strong></p>
+
+                <div class="warning-box">
+                    <strong>Operations That Cause Shuffle:</strong>
+                    <br>groupBy() | join() | distinct() | repartition() | sort() | window()
+                </div>
+
+                <div class="success-box">
+                    <strong>How to Minimize Shuffling:</strong>
+                    <br><br>
+                    ❌ Bad: <code>df.groupBy("dept").count()</code> — Shuffles all data
+                    <br><br>
+                    ✅ Good: <code>df.filter(df.salary > 50000).groupBy("dept").count()</code> — Only shuffles filtered data (smaller!)
+                </div>
+            </section>
+
+            <!-- SECTION 3: EXECUTION -->
+            <section id="execution">
+                <h2><span class="emoji">🛠️</span> Step-by-Step Execution Workflow</h2>
+
+                <h3>Complete Code Example</h3>
+
+                <pre><code>from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+
+# Initialize Spark
+spark = SparkSession.builder \
+    .appName("OrderAnalysis") \
+    .getOrCreate()
+
+# Read Data (Lazy - Just creates plan)
+df_orders = spark.read.csv("orders.csv", header=True, inferSchema=True)
+
+# Transform 1 - Filter (Narrow, Lazy)
+df_high_value = df_orders.filter(df_orders.amount > 1000)
+
+# Transform 2 - Select Columns (Narrow, Lazy)
+df_selected = df_high_value.select("customer_id", "amount", "state")
+
+# Transform 3 - GroupBy (Wide, Lazy) ← SHUFFLE WILL HAPPEN
+df_grouped = df_selected.groupBy("state").agg(
+    F.sum("amount").alias("total_sales")
+)
+
+# ACTION - Trigger Execution!
+df_grouped.show()</code></pre>
+
+                <h3>What Happens Behind the Scenes</h3>
+
+                <div class="diagram">
+STAGE 1: Read & Filter & Select (Narrow Transformations) ✅
+├─ Partition 1 (128MB) on Executor 0
+│  ↓ Read CSV → Filter → Select
+│  ↓ Output: 150,000 rows
+├─ Partition 2 (128MB) on Executor 1 (Parallel!)
+│  ↓ Read CSV → Filter → Select
+│  ↓ Output: 150,000 rows
+└─ ... (Partitions 3-9 processed similarly)
+
+                ↓ (1.5 million rows now)
+
+STAGE 2: Shuffle & GroupBy (Wide Transformation) ⚡
+├─ Data is shuffled across network:
+│  - All CA rows → Executor 0
+│  - All NY rows → Executor 1
+│  - All TX rows → Executor 0
+│  - etc.
+├─ Then aggregate locally in each executor
+└─ Result: 50 rows (one per state)
+
+                ↓
+
+STAGE 3: Collect & Display
+├─ Driver collects 50 rows
+└─ Displays results to user ✅
+                </div>
+            </section>
+
+            <!-- SECTION 4: INTERVIEWS -->
+            <section id="interviews">
+                <h2><span class="emoji">🎯</span> High-Yield Interview Q&A</h2>
+
+                <div class="qa-section">
+                    <strong>❓ Question 1: Explain PySpark Architecture in 30 Seconds</strong>
+                    <div class="answer">
+                        <p><strong>Answer:</strong> "PySpark follows a master-worker architecture. The <strong>Driver</strong> is the main orchestrator that runs your code and creates an execution plan. The <strong>Cluster Manager</strong> allocates resources to <strong>Executors</strong> (worker processes). Data is split into <strong>Partitions</strong> and processed in <strong>Tasks</strong>, which run in parallel on executor cores. When you trigger an action like <code>.show()</code> or <code>.write()</code>, Spark builds a <strong>DAG</strong> (Directed Acyclic Graph), optimizes it, and sends tasks to executors. Executors process data locally on partitions, and if a <strong>shuffle</strong> is needed (e.g., for groupBy or join), data moves between executors across the network. Finally, results are collected by the driver and returned to the user."</p>
+                        <p><strong>Why this impresses:</strong> ✅ Mentions core components ✅ Explains DAG ✅ Mentions shuffle ✅ Covers full lifecycle</p>
+                    </div>
+                </div>
+
+                <div class="qa-section">
+                    <strong>❓ Question 2: Narrow vs Wide Transformations — Why Does It Matter?</strong>
+                    <div class="answer">
+                        <p><strong>Answer:</strong> "Narrow Transformations like <code>.filter()</code>, <code>.select()</code>, and <code>.map()</code> operate on each partition independently with no data movement. Wide Transformations like <code>.groupBy()</code>, <code>.join()</code>, and <code>.repartition()</code> require shuffle — data must move between executors across the network.</p>
+                        <p><strong>Why it matters:</strong></p>
+                        <ul style="margin-left: 20px;">
+                            <li>Narrow transformations are fast (no network overhead)</li>
+                            <li>Wide transformations are slow (network I/O is expensive)</li>
+                            <li>One wide transformation triggers stage boundaries</li>
+                        </ul>
+                        <p><strong>Best practice:</strong> Apply filters and selects (narrow) <strong>BEFORE</strong> groupBy or join (wide) to minimize shuffle volume.</p>
+                    </div>
+                </div>
+
+                <div class="qa-section">
+                    <strong>❓ Question 3: How Would You Handle Data Skew in GroupBy?</strong>
+                    <div class="answer">
+                        <p><strong>Answer:</strong> "Data skew occurs when certain group keys have disproportionately more data, causing one executor to process vastly more than others."</p>
+                        <p><strong>Solution — Salting (Most Effective):</strong></p>
+                        <pre><code>from pyspark.sql.functions import rand, concat, lit
+
+df_salted = df.withColumn(
+    "group_key",
+    concat(df.state, lit("_"), (rand() * 10).cast("int"))
+)
+
+# Now "California" is split into 10 sub-groups
+df_grouped = df_salted.groupBy("group_key").agg(F.sum("sales"))
+
+# Final aggregation combines results:
+df_final = df_grouped.groupBy("state").agg(F.sum("sum(sales)"))</code></pre>
+                        <p>This distributes hot keys across executors, enabling parallel processing.</p>
+                    </div>
+                </div>
+
+                <div class="qa-section">
+                    <strong>❓ Question 4: repartition() vs coalesce() — What's the Difference?</strong>
+                    <div class="answer">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Feature</th>
+                                    <th>repartition()</th>
+                                    <th>coalesce()</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Full shuffle?</td>
+                                    <td>YES ✅</td>
+                                    <td>NO</td>
+                                </tr>
+                                <tr>
+                                    <td>Can increase?</td>
+                                    <td>YES</td>
+                                    <td>NO</td>
+                                </tr>
+                                <tr>
+                                    <td>Can decrease?</td>
+                                    <td>YES</td>
+                                    <td>YES</td>
+                                </tr>
+                                <tr>
+                                    <td>Network overhead</td>
+                                    <td>HIGH</td>
+                                    <td>LOW</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p><strong>Rule:</strong> Use <code>coalesce()</code> when decreasing partitions, <code>repartition()</code> when increasing.</p>
+                    </div>
+                </div>
+
+                <div class="qa-section">
+                    <strong>❓ Question 5: What Happens When You Call .collect() on Large DataFrame?</strong>
+                    <div class="answer">
+                        <p><strong>Answer:</strong> "<code>.collect()</code> retrieves ALL data from executors to the driver node in memory. This is dangerous for large DataFrames because:</p>
+                        <ul style="margin-left: 20px;">
+                            <li><strong>Memory Risk:</strong> Driver has limited memory (~4GB). Large data → OOM</li>
+                            <li><strong>Network Risk:</strong> All data travels back over network (slow)</li>
+                            <li><strong>Defeats Purpose:</strong> You lose the benefit of distributed computing</li>
+                        </ul>
+                        <p><strong>Safe alternatives:</strong></p>
+                        <pre><code>✅ SAFE: Only first 100 rows
+result = df.filter(df.amount > 100000).limit(100).collect()
+
+✅ BETTER: Use actions that don't collect all data
+df.filter(df.amount > 100000).show()  # Displays first 20
+
+✅ BEST: Write to file instead
+df.filter(df.amount > 100000).write.parquet("output/")</code></pre>
+                    </div>
+                </div>
+
+                <div class="qa-section">
+                    <strong>❓ Question 6: Explain Broadcast Joins</strong>
+                    <div class="answer">
+                        <p><strong>Answer:</strong> "A broadcast join is an optimization for joining a large table with a small table. Instead of shuffling both tables (expensive), Spark broadcasts (copies) the small table to every executor, then does a local join."</p>
+                        <pre><code>from pyspark.sql.functions import broadcast
+
+# ❌ Regular join (shuffle happens)
+result = df_large.join(df_small, "id")
+
+# ✅ Broadcast join (no shuffle)
+result = df_large.join(broadcast(df_small), "id")</code></pre>
+                        <p><strong>When to use:</strong> Small table &lt; 10 MB (configurable threshold)</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 5: OPTIMIZATION -->
+            <section id="optimization">
+                <h2><span class="emoji">⚡</span> Performance Optimization Tips</h2>
+
+                <h3>1. Caching & Persistence</h3>
+                <pre><code># Bad: Re-computes df every time
+df.filter(...).show()
+df.filter(...).count()
+
+# Good: Cache after transformation
+df_filtered = df.filter(...)
+df_filtered.cache()  # or .persist()
+df_filtered.show()   # Uses cache
+df_filtered.count()  # Uses cache
+
+# Release cache when done
+df_filtered.unpersist()</code></pre>
+
+                <h3>2. Partitioning Strategy</h3>
+                <p>Right number of partitions = num_executors × cores</p>
+                <pre><code>df = df.repartition(200)  # Good for large jobs</code></pre>
+
+                <h3>3. File Format Selection</h3>
+                <pre><code># ❌ Slow for repeated queries
+df = spark.read.csv("data.csv")
+
+# ✅ Fast for repeated queries
+df = spark.read.parquet("data.parquet")</code></pre>
+
+                <h3>4. Predicate Pushdown</h3>
+                <pre><code># ✅ Filters while reading (automatic with Parquet)
+df = spark.read.parquet("large_file.parquet")
+df_filtered = df.filter(df.amount > 100)</code></pre>
+
+                <h3>Quick Reference: Common Transformations</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Transformation</th>
+                            <th>Type</th>
+                            <th>Shuffle?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>.select()</td>
+                            <td>Narrow</td>
+                            <td>No</td>
+                        </tr>
+                        <tr>
+                            <td>.filter()</td>
+                            <td>Narrow</td>
+                            <td>No</td>
+                        </tr>
+                        <tr>
+                            <td>.withColumn()</td>
+                            <td>Narrow</td>
+                            <td>No</td>
+                        </tr>
+                        <tr>
+                            <td>.groupBy().agg()</td>
+                            <td>Wide</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>.join()</td>
+                            <td>Wide</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>.distinct()</td>
+                            <td>Wide</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>.repartition()</td>
+                            <td>Wide</td>
+                            <td>Yes</td>
+                        </tr>
+                        <tr>
+                            <td>.orderBy()</td>
+                            <td>Wide</td>
+                            <td>Yes</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- FOOTER -->
+        </main>
+
+        <footer>
+            <p>🚀 <strong>PySpark Architecture & Execution Guide</strong></p>
+            <p>A comprehensive resource for Data Engineers & Interview Preparation</p>
+            <p style="margin-top: 20px; font-size: 0.9em; opacity: 0.8;">Last Updated: May 2026 | Covers PySpark 3.5.1+</p>
+        </footer>
+    </div>
+
+    <div class="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
+
+    <script>
+        // Show/hide back-to-top button
+        window.addEventListener('scroll', function() {
+            const btn = document.querySelector('.back-to-top');
+            if (window.pageYOffset > 300) {
+                btn.classList.add('show');
+            } else {
+                btn.classList.remove('show');
+            }
+        });
+
+        // Smooth scrolling for nav links
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+    </script>
+</body>
+</html>
