@@ -305,6 +305,7 @@
                 <li><a href="#execution">Execution</a></li>
                 <li><a href="#interviews">Interview Q&A</a></li>
                 <li><a href="#optimization">Optimization</a></li>
+                <li><a href="#resources">Resources</a></li>
             </ul>
         </nav>
 
@@ -382,20 +383,107 @@ df.show()
                 </div>
 
                 <h4>3️⃣ Worker Nodes & Executors (Kitchen Stations)</h4>
-                <p><strong>What it does:</strong> Actually processes data</p>
+                <p><strong>What it does:</strong> Actually processes data in parallel</p>
 
-                <div class="diagram">
-CLUSTER WITH 5 EXECUTORS
-┌─────────────────────────────────────────┐
-│ EXECUTOR 1        │ EXECUTOR 2          │
-│ Cores: 4 (Slots)  │ Cores: 4 (Slots)    │
-│ Memory: 8GB       │ Memory: 8GB         │
-│ ┌──┬──┬──┬──┐    │ ┌──┬──┬──┬──┐      │
-│ │T1│T2│T3│T4│    │ │T5│T6│T7│T8│      │
-│ └──┴──┴──┴──┘    │ └──┴──┴──┴──┘      │
-└─────────────────────────────────────────┘
+                <div style="background: #f0f4ff; border-left: 4px solid #667eea; padding: 15px; margin: 15px 0; border-radius: 6px;">
+                    <strong style="color: #667eea;">How it works:</strong><br>
+                    Each worker node runs an <strong>Executor</strong> (JVM process) with <strong>cores</strong> (slots) and <strong>memory</strong><br>
+                    Each core can run ONE task at a time
+                </div>
 
-All tasks run in PARALLEL! (20 tasks simultaneously)
+                <pre><code># Check executor configuration:
+spark.sparkContext.getConf().getAll()
+
+# Output example:
+# spark.executor.cores = 4
+# spark.executor.memory = 8g
+# spark.executor.instances = 5
+
+# This means:
+# 5 executors × 4 cores = 20 parallel tasks! 🚀</code></pre>
+
+                <p><strong style="color: #667eea; margin-top: 20px; font-size: 1.1em;">Example: 5 Executors, Each with 4 Cores</strong></p>
+                
+                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin: 20px 0;">
+                    <!-- EXECUTOR 1 -->
+                    <div style="background: white; border: 2px solid #667eea; border-radius: 8px; padding: 15px; text-align: center;">
+                        <div style="background: #667eea; color: white; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-weight: bold;">EXECUTOR 1</div>
+                        <div style="font-size: 0.85em; color: #666; margin-bottom: 10px;">
+                            💾 Memory: 8GB<br>
+                            ⚙️ Cores: 4
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T1</div>
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T2</div>
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T3</div>
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T4</div>
+                        </div>
+                    </div>
+
+                    <!-- EXECUTOR 2 -->
+                    <div style="background: white; border: 2px solid #667eea; border-radius: 8px; padding: 15px; text-align: center;">
+                        <div style="background: #667eea; color: white; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-weight: bold;">EXECUTOR 2</div>
+                        <div style="font-size: 0.85em; color: #666; margin-bottom: 10px;">
+                            💾 Memory: 8GB<br>
+                            ⚙️ Cores: 4
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T5</div>
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T6</div>
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T7</div>
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T8</div>
+                        </div>
+                    </div>
+
+                    <!-- EXECUTOR 3 -->
+                    <div style="background: white; border: 2px solid #667eea; border-radius: 8px; padding: 15px; text-align: center;">
+                        <div style="background: #667eea; color: white; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-weight: bold;">EXECUTOR 3</div>
+                        <div style="font-size: 0.85em; color: #666; margin-bottom: 10px;">
+                            💾 Memory: 8GB<br>
+                            ⚙️ Cores: 4
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T9</div>
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T10</div>
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T11</div>
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T12</div>
+                        </div>
+                    </div>
+
+                    <!-- EXECUTOR 4 -->
+                    <div style="background: white; border: 2px solid #667eea; border-radius: 8px; padding: 15px; text-align: center;">
+                        <div style="background: #667eea; color: white; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-weight: bold;">EXECUTOR 4</div>
+                        <div style="font-size: 0.85em; color: #666; margin-bottom: 10px;">
+                            💾 Memory: 8GB<br>
+                            ⚙️ Cores: 4
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T13</div>
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T14</div>
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T15</div>
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T16</div>
+                        </div>
+                    </div>
+
+                    <!-- EXECUTOR 5 -->
+                    <div style="background: white; border: 2px solid #667eea; border-radius: 8px; padding: 15px; text-align: center;">
+                        <div style="background: #667eea; color: white; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-weight: bold;">EXECUTOR 5</div>
+                        <div style="font-size: 0.85em; color: #666; margin-bottom: 10px;">
+                            💾 Memory: 8GB<br>
+                            ⚙️ Cores: 4
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T17</div>
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T18</div>
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T19</div>
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em;">T20</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0; border-radius: 6px;">
+                    <strong style="color: #28a745; font-size: 1.1em;">⚡ All 20 Tasks Run In PARALLEL!</strong><br>
+                    Each executor processes its 4 tasks simultaneously on its 4 cores
                 </div>
 
                 <h4>4️⃣ Partitions (Data Distribution)</h4>
@@ -424,115 +512,99 @@ Partition 3 → Executor 0 (when done with P1)
                     <br><br>Total time = 3 waves × task_duration
                 </div>
 
-                <h3>The Complete Workflow: From Code to Results</h3>
+                <h3>The Complete Workflow: 8 Easy Steps</h3>
 
-                <div style="background: #f8f9fa; border: 2px solid #667eea; border-radius: 12px; padding: 30px; margin: 30px 0;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start;">
-                        <!-- LEFT COLUMN: CODE -->
-                        <div style="border-right: 2px dashed #ccc; padding-right: 20px;">
-                            <h4 style="color: #667eea; margin-bottom: 20px;">YOUR CODE</h4>
-                            
-                            <div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px; font-family: monospace; font-size: 0.9em;">
-                                <div style="color: #28a745; margin-bottom: 5px;">✓ Step 1: You Submit PySpark Job</div>
-                                <code>spark-submit script.py</code>
-                            </div>
-
-                            <div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-                                <div style="color: #28a745; margin-bottom: 5px;">✓ Step 2: Driver Node Starts</div>
-                                <div style="font-size: 0.85em;">Initializes SparkSession | Parses your Python code | Creates RDD/DataFrame objects (no execution yet!)</div>
-                            </div>
-
-                            <div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-                                <div style="color: #28a745; margin-bottom: 5px;">✓ Step 3: Action Triggered</div>
-                                <div style="font-size: 0.85em;">NOW Spark builds Logical → Physical Plan</div>
-                                <code style="color: #d63384;">.show(), .write()</code>
-                            </div>
-
-                            <div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-                                <div style="color: #28a745; margin-bottom: 5px;">✓ Step 4: DAG Optimization</div>
-                                <div style="font-size: 0.85em;">Combines operations (predicate pushdown) | Plans shuffle if needed (groupBy, join) | Creates Stages from DAG</div>
-                            </div>
-                        </div>
-
-                        <!-- RIGHT COLUMN: EXECUTION -->
-                        <div style="padding-left: 20px;">
-                            <h4 style="color: #764ba2; margin-bottom: 20px;">CLUSTER EXECUTION</h4>
-                            
-                            <div style="background: #e7f3ff; border-left: 4px solid #667eea; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-                                <div style="color: #667eea; font-weight: bold; margin-bottom: 8px;">Step 5: Cluster Manager Assigns Resources</div>
-                                <div style="font-size: 0.9em;">
-                                    "Executor 1: Run Task 1-4 on Partitions 1-4"<br>
-                                    "Executor 2: Run Task 5-8 on Partitions 5-8"<br>
-                                    "Executor 3: Run Task 9 on Partition 9"
-                                </div>
-                            </div>
-
-                            <div style="background: #d4edda; border-left: 4px solid #28a745; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-                                <div style="color: #28a745; font-weight: bold; margin-bottom: 8px;">Step 6: Executors Process In Parallel ⚡</div>
-                                <div style="font-size: 0.9em;">
-                                    Each executor:<br>
-                                    ✓ Reads partition data<br>
-                                    ✓ Applies transformations (filter, map, etc.)<br>
-                                    ✓ Caches intermediate results if needed<br>
-                                    ✓ Returns results to driver
-                                </div>
-                            </div>
-
-                            <div style="background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-                                <div style="color: #ffc107; font-weight: bold; margin-bottom: 8px;">Step 7: Shuffle (if needed) 🌐</div>
-                                <div style="font-size: 0.9em;">
-                                    Data moves between executors across network<br>
-                                    <strong>(The most expensive operation!)</strong>
-                                </div>
-                            </div>
-
-                            <div style="background: #d4edda; border-left: 4px solid #28a745; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-                                <div style="color: #28a745; font-weight: bold; margin-bottom: 8px;">Step 8: Final Result Collection ✅</div>
-                                <div style="font-size: 0.9em;">
-                                    Driver collects results from executors<br>
-                                    Combines partitions<br>
-                                    Returns to user
-                                </div>
-                            </div>
+                <div style="background: white; padding: 0;">
+                    <!-- STEP 1 -->
+                    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                        <div style="background: #667eea; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.3em; flex-shrink: 0;">1</div>
+                        <div style="margin-left: 20px; background: #f0f4ff; border-left: 4px solid #667eea; padding: 15px; border-radius: 6px; flex-grow: 1;">
+                            <strong style="color: #667eea; font-size: 1.1em;">YOU SUBMIT PYSPARK JOB</strong><br>
+                            <code style="color: #333;">spark-submit script.py</code>
                         </div>
                     </div>
 
-                    <!-- VISUAL TIMELINE -->
-                    <div style="margin-top: 30px; padding-top: 30px; border-top: 2px solid #ddd;">
-                        <h4 style="color: #333; margin-bottom: 20px; text-align: center;">Execution Timeline</h4>
-                        <div style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 15px;">
-                            <div style="text-align: center;">
-                                <div style="background: #667eea; color: white; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 10px;">1</div>
-                                <div style="font-size: 0.85em;">Submit Job</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="background: #667eea; color: white; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 10px;">2</div>
-                                <div style="font-size: 0.85em;">Driver Start</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="background: #667eea; color: white; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 10px;">3</div>
-                                <div style="font-size: 0.85em;">Action</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="background: #764ba2; color: white; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 10px;">4</div>
-                                <div style="font-size: 0.85em;">Optimize</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="background: #764ba2; color: white; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 10px;">5</div>
-                                <div style="font-size: 0.85em;">Allocate</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="background: #28a745; color: white; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 10px;">6</div>
-                                <div style="font-size: 0.85em;">Process</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="background: #ffc107; color: white; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 10px;">7</div>
-                                <div style="font-size: 0.85em;">Shuffle</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="background: #28a745; color: white; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 10px;">✓</div>
-                                <div style="font-size: 0.85em;">Results</div>
-                            </div>
+                    <!-- ARROW -->
+                    <div style="text-align: center; color: #667eea; font-size: 1.5em; margin-bottom: 15px;">↓</div>
+
+                    <!-- STEP 2 -->
+                    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                        <div style="background: #667eea; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.3em; flex-shrink: 0;">2</div>
+                        <div style="margin-left: 20px; background: #f0f4ff; border-left: 4px solid #667eea; padding: 15px; border-radius: 6px; flex-grow: 1;">
+                            <strong style="color: #667eea; font-size: 1.1em;">DRIVER NODE STARTS</strong><br>
+                            Initializes Spark | Parses your code | Creates DataFrame (no execution yet!)
+                        </div>
+                    </div>
+
+                    <!-- ARROW -->
+                    <div style="text-align: center; color: #667eea; font-size: 1.5em; margin-bottom: 15px;">↓</div>
+
+                    <!-- STEP 3 -->
+                    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                        <div style="background: #667eea; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.3em; flex-shrink: 0;">3</div>
+                        <div style="margin-left: 20px; background: #f0f4ff; border-left: 4px solid #667eea; padding: 15px; border-radius: 6px; flex-grow: 1;">
+                            <strong style="color: #667eea; font-size: 1.1em;">ACTION TRIGGERED</strong><br>
+                            <code style="color: #d63384;">.show()</code> or <code style="color: #d63384;">.write()</code> → NOW Spark starts execution!
+                        </div>
+                    </div>
+
+                    <!-- ARROW -->
+                    <div style="text-align: center; color: #764ba2; font-size: 1.5em; margin-bottom: 15px;">↓</div>
+
+                    <!-- STEP 4 -->
+                    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                        <div style="background: #764ba2; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.3em; flex-shrink: 0;">4</div>
+                        <div style="margin-left: 20px; background: #f5eeff; border-left: 4px solid #764ba2; padding: 15px; border-radius: 6px; flex-grow: 1;">
+                            <strong style="color: #764ba2; font-size: 1.1em;">DAG OPTIMIZATION</strong><br>
+                            Spark creates plan | Optimizes operations | Plans shuffle if needed
+                        </div>
+                    </div>
+
+                    <!-- ARROW -->
+                    <div style="text-align: center; color: #28a745; font-size: 1.5em; margin-bottom: 15px;">↓</div>
+
+                    <!-- STEP 5 -->
+                    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                        <div style="background: #28a745; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.3em; flex-shrink: 0;">5</div>
+                        <div style="margin-left: 20px; background: #f0fff4; border-left: 4px solid #28a745; padding: 15px; border-radius: 6px; flex-grow: 1;">
+                            <strong style="color: #28a745; font-size: 1.1em;">CLUSTER MANAGER ASSIGNS</strong><br>
+                            "Executor 1 → Process partitions 1-4" | "Executor 2 → Process partitions 5-8"
+                        </div>
+                    </div>
+
+                    <!-- ARROW -->
+                    <div style="text-align: center; color: #28a745; font-size: 1.5em; margin-bottom: 15px;">↓</div>
+
+                    <!-- STEP 6 -->
+                    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                        <div style="background: #28a745; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.3em; flex-shrink: 0;">6</div>
+                        <div style="margin-left: 20px; background: #f0fff4; border-left: 4px solid #28a745; padding: 15px; border-radius: 6px; flex-grow: 1;">
+                            <strong style="color: #28a745; font-size: 1.1em;">EXECUTORS PROCESS ⚡ (IN PARALLEL)</strong><br>
+                            Read data | Apply filter | Apply select | Process independently (FAST!)
+                        </div>
+                    </div>
+
+                    <!-- ARROW -->
+                    <div style="text-align: center; color: #ffc107; font-size: 1.5em; margin-bottom: 15px;">↓</div>
+
+                    <!-- STEP 7 -->
+                    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                        <div style="background: #ffc107; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.3em; flex-shrink: 0;">7</div>
+                        <div style="margin-left: 20px; background: #fffbf0; border-left: 4px solid #ffc107; padding: 15px; border-radius: 6px; flex-grow: 1;">
+                            <strong style="color: #ffc107; font-size: 1.1em;">SHUFFLE (If GroupBy/Join) 🌐</strong><br>
+                            Data moves between executors across network <strong>(SLOW!)</strong>
+                        </div>
+                    </div>
+
+                    <!-- ARROW -->
+                    <div style="text-align: center; color: #28a745; font-size: 1.5em; margin-bottom: 15px;">↓</div>
+
+                    <!-- STEP 8 -->
+                    <div style="display: flex; align-items: center; margin-bottom: 0;">
+                        <div style="background: #28a745; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.3em; flex-shrink: 0;">✓</div>
+                        <div style="margin-left: 20px; background: #f0fff4; border-left: 4px solid #28a745; padding: 15px; border-radius: 6px; flex-grow: 1;">
+                            <strong style="color: #28a745; font-size: 1.1em;">RESULTS RETURNED ✅</strong><br>
+                            Driver collects data | Displays to user | Job complete!
                         </div>
                     </div>
                 </div>
@@ -1046,6 +1118,165 @@ df_filtered = df.filter(df.amount > 100)</code></pre>
                         </tr>
                     </tbody>
                 </table>
+            </section>
+
+            <!-- SECTION: HELPFUL RESOURCES -->
+            <section id="resources">
+                <h2><span class="emoji">🔗</span> Helpful Learning Resources</h2>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+                    <!-- OFFICIAL DOCUMENTATION -->
+                    <div style="background: #f8f9fa; border: 2px solid #667eea; border-radius: 8px; padding: 20px;">
+                        <h3 style="color: #667eea; margin-top: 0;">📚 Official Documentation</h3>
+                        <ul style="list-style: none; padding-left: 0;">
+                            <li style="margin-bottom: 15px;">
+                                <a href="https://spark.apache.org/docs/latest/api/python/" target="_blank" style="color: #667eea; font-weight: 600; text-decoration: none;">
+                                    ✓ PySpark API Documentation
+                                </a><br>
+                                <span style="font-size: 0.85em; color: #666;">Official PySpark Python API reference and examples</span>
+                            </li>
+                            <li style="margin-bottom: 15px;">
+                                <a href="https://spark.apache.org/docs/latest/" target="_blank" style="color: #667eea; font-weight: 600; text-decoration: none;">
+                                    ✓ Apache Spark Documentation
+                                </a><br>
+                                <span style="font-size: 0.85em; color: #666;">Complete Spark documentation for all languages</span>
+                            </li>
+                            <li style="margin-bottom: 15px;">
+                                <a href="https://spark.apache.org/docs/latest/web-ui.html" target="_blank" style="color: #667eea; font-weight: 600; text-decoration: none;">
+                                    ✓ Spark UI Guide
+                                </a><br>
+                                <span style="font-size: 0.85em; color: #666;">How to monitor and debug jobs using Spark UI</span>
+                            </li>
+                            <li style="margin-bottom: 15px;">
+                                <a href="https://spark.apache.org/docs/latest/sql-programming-guide.html" target="_blank" style="color: #667eea; font-weight: 600; text-decoration: none;">
+                                    ✓ Spark SQL Guide
+                                </a><br>
+                                <span style="font-size: 0.85em; color: #666;">Using DataFrames and SQL in Spark</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- LEARNING PLATFORMS -->
+                    <div style="background: #f8f9fa; border: 2px solid #764ba2; border-radius: 8px; padding: 20px;">
+                        <h3 style="color: #764ba2; margin-top: 0;">🎓 Learning Platforms</h3>
+                        <ul style="list-style: none; padding-left: 0;">
+                            <li style="margin-bottom: 15px;">
+                                <a href="https://learn.microsoft.com/en-us/training/modules/intro-to-pyspark/" target="_blank" style="color: #764ba2; font-weight: 600; text-decoration: none;">
+                                    ✓ Microsoft Learn - PySpark
+                                </a><br>
+                                <span style="font-size: 0.85em; color: #666;">Free PySpark fundamentals course from Microsoft</span>
+                            </li>
+                            <li style="margin-bottom: 15px;">
+                                <a href="https://www.udemy.com/course/the-ultimate-hands-on-hadoop-tame-your-big-data/" target="_blank" style="color: #764ba2; font-weight: 600; text-decoration: none;">
+                                    ✓ Udemy PySpark Courses
+                                </a><br>
+                                <span style="font-size: 0.85em; color: #666;">Comprehensive PySpark courses (often on sale)</span>
+                            </li>
+                            <li style="margin-bottom: 15px;">
+                                <a href="https://www.databricks.com/learn" target="_blank" style="color: #764ba2; font-weight: 600; text-decoration: none;">
+                                    ✓ Databricks Learning
+                                </a><br>
+                                <span style="font-size: 0.85em; color: #666;">Official Spark/Databricks training and tutorials</span>
+                            </li>
+                            <li style="margin-bottom: 15px;">
+                                <a href="https://www.coursera.org/" target="_blank" style="color: #764ba2; font-weight: 600; text-decoration: none;">
+                                    ✓ Coursera - Big Data & Spark
+                                </a><br>
+                                <span style="font-size: 0.85em; color: #666;">University-level courses on Big Data and Spark</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+                    <!-- YOUTUBE & TUTORIALS -->
+                    <div style="background: #f8f9fa; border: 2px solid #28a745; border-radius: 8px; padding: 20px;">
+                        <h3 style="color: #28a745; margin-top: 0;">📺 Video Tutorials</h3>
+                        <ul style="list-style: none; padding-left: 0;">
+                            <li style="margin-bottom: 15px;">
+                                <a href="https://www.youtube.com/@GuyinaCube" target="_blank" style="color: #28a745; font-weight: 600; text-decoration: none;">
+                                    ✓ Guy in a Cube - PySpark Tutorials
+                                </a><br>
+                                <span style="font-size: 0.85em; color: #666;">Video tutorials on Spark, PySpark, and Azure</span>
+                            </li>
+                            <li style="margin-bottom: 15px;">
+                                <a href="https://www.youtube.com/results?search_query=pyspark+tutorial" target="_blank" style="color: #28a745; font-weight: 600; text-decoration: none;">
+                                    ✓ YouTube PySpark Search
+                                </a><br>
+                                <span style="font-size: 0.85em; color: #666;">Browse various PySpark tutorial channels</span>
+                            </li>
+                            <li style="margin-bottom: 15px;">
+                                <a href="https://www.youtube.com/@DataEngineeringSimplified" target="_blank" style="color: #28a745; font-weight: 600; text-decoration: none;">
+                                    ✓ Data Engineering Simplified
+                                </a><br>
+                                <span style="font-size: 0.85em; color: #666;">Data engineering and PySpark explained simply</span>
+                            </li>
+                            <li style="margin-bottom: 15px;">
+                                <a href="https://www.youtube.com/@DataTalks.Club" target="_blank" style="color: #28a745; font-weight: 600; text-decoration: none;">
+                                    ✓ DataTalks.Club
+                                </a><br>
+                                <span style="font-size: 0.85em; color: #666;">Data engineering courses and discussions</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- COMMUNITIES & FORUMS -->
+                    <div style="background: #f8f9fa; border: 2px solid #ffc107; border-radius: 8px; padding: 20px;">
+                        <h3 style="color: #ffc107; margin-top: 0;">👥 Communities & Forums</h3>
+                        <ul style="list-style: none; padding-left: 0;">
+                            <li style="margin-bottom: 15px;">
+                                <a href="https://spark.apache.org/" target="_blank" style="color: #ffc107; font-weight: 600; text-decoration: none;">
+                                    ✓ Apache Spark Community
+                                </a><br>
+                                <span style="font-size: 0.85em; color: #666;">Official Spark community and mailing lists</span>
+                            </li>
+                            <li style="margin-bottom: 15px;">
+                                <a href="https://stackoverflow.com/questions/tagged/apache-spark" target="_blank" style="color: #ffc107; font-weight: 600; text-decoration: none;">
+                                    ✓ Stack Overflow - Spark
+                                </a><br>
+                                <span style="font-size: 0.85em; color: #666;">Ask and answer Spark questions</span>
+                            </li>
+                            <li style="margin-bottom: 15px;">
+                                <a href="https://www.reddit.com/r/dataengineering/" target="_blank" style="color: #ffc107; font-weight: 600; text-decoration: none;">
+                                    ✓ r/dataengineering - Reddit
+                                </a><br>
+                                <span style="font-size: 0.85em; color: #666;">Data engineering community and discussions</span>
+                            </li>
+                            <li style="margin-bottom: 15px;">
+                                <a href="https://databricks.com/community" target="_blank" style="color: #ffc107; font-weight: 600; text-decoration: none;">
+                                    ✓ Databricks Community
+                                </a><br>
+                                <span style="font-size: 0.85em; color: #666;">Official Databricks community forum</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- QUICK REFERENCE -->
+                <div style="background: #e7f3ff; border: 2px solid #667eea; border-radius: 8px; padding: 25px;">
+                    <h3 style="color: #667eea; margin-top: 0;">📖 Quick Reference Guides</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                        <div>
+                            <a href="https://www.w3schools.com/python/" target="_blank" style="color: #667eea; font-weight: 600; text-decoration: none;">
+                                ✓ W3Schools Python
+                            </a><br>
+                            <span style="font-size: 0.85em; color: #666;">Python basics reference</span>
+                        </div>
+                        <div>
+                            <a href="https://realpython.com/" target="_blank" style="color: #667eea; font-weight: 600; text-decoration: none;">
+                                ✓ Real Python
+                            </a><br>
+                            <span style="font-size: 0.85em; color: #666;">In-depth Python tutorials</span>
+                        </div>
+                        <div>
+                            <a href="https://pandas.pydata.org/docs/" target="_blank" style="color: #667eea; font-weight: 600; text-decoration: none;">
+                                ✓ Pandas Documentation
+                            </a><br>
+                            <span style="font-size: 0.85em; color: #666;">Data manipulation library</span>
+                        </div>
+                    </div>
+                </div>
+
             </section>
 
             <!-- FOOTER -->
